@@ -104,3 +104,31 @@ int has_prefix(const char *str, const char *pre)
 {
     return strncmp(str, pre, strlen(pre)) == 0;
 }
+
+char **split2(char *str, char delimiter)
+{
+    char *string = strdup(str);
+    char **res = malloc(sizeof(char) * strlen(str));
+    int i = 0, j = 0, n = 0, len = strlen(string);
+
+    // a,b,c
+    // 01234
+    for (i = 0; i < len; i++) {
+        if (str[i] == delimiter) {
+            string[i - j] = '\0';
+            res[n] = string;
+            string = string + i + 1;
+            j = i + 1;
+            n++;
+        }
+    }
+
+    return res;
+}
+
+int main()
+{
+    char *a = "a,b,c";
+    char **res = split2(a, ',');
+    printf("%s", res[0]);
+}
