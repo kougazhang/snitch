@@ -2,6 +2,23 @@
 #include <string.h>
 #include <stdlib.h>
 
+#define defer(fn) __attribute__((cleanup(fn)))
+
+void cleanup_free(void *p)
+{
+    free(*((void **)p));
+}
+#define defer_free defer(cleanup_free)
+
+void cleanup_file(FILE **fp)
+{
+    if (*fp == NULL) {
+        return;
+    }
+    fclose(*fp);
+}
+#define defer_file defer(cleanup_file)
+
 char *slice(char *s, int start, int end)
 {
     int i = 0, n = 0;
@@ -58,15 +75,12 @@ int main()
 {
     char *a = "a,b,c";
     int n = 0;
-    char *string = strdup(a);
+    defer_free char *string = strdup(a);
     char *delimiter = ",";
-    char **res = split(string, ',', &n);
+    defer_free char **res = split(string, ',', &n);
     for (int i = 0; i < n; i++) {
         printf("%s\n", res[i]);
     }
-    char *jo = join(res, n, delimiter);
+    defer_free char *jo = join(res, n, delimiter);
     printf("%s\n", jo);
-    free(string);
-    free(res);
-    free(jo);
 }
