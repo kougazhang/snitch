@@ -18,109 +18,37 @@ char *slice(char *s, int start, int end)
     return res;
 }
 
-void split_free(char **res, int size)
-{
-    if (res == NULL) {
-        return;
-    }
-
-    for (int i = 0; i < size; i++) {
-        free(res[i]);
-    }
-    free(res);
-}
-
-char **split(char *string, char delimiter, int *n)
-{
-    int len = strlen(string);
-    int i = 0, last = 0;
-    char **res = NULL;
-    char **temp = NULL;
-
-    for (i = 0; i < len; i++) {
-        if (delimiter == string[i]) {
-            temp = (char **)realloc(res, sizeof(char *) * (*n + 1));
-            if (temp == NULL) {
-                printf("realloc failed");
-                split_free(res, *n); // Free memory before returning NULL
-                return NULL;
-            }
-            res = temp;
-            res[*n] = slice(string, last, i);
-            if (res[*n] == NULL) {
-                split_free(res, *n); // Free memory before returning NULL
-                return NULL;
-            }
-            (*n)++;
-            last = i + 1;
-        }
-    }
-
-    temp = (char **)realloc(res, sizeof(char *) * (*n + 1));
-    if (temp == NULL) {
-        printf("realloc failed");
-        split_free(res, *n); // Free memory before returning NULL
-        return NULL;
-    }
-    res = temp;
-    res[*n] = slice(string, last, i);
-    if (res[*n] == NULL) {
-        split_free(res, *n); // Free memory before returning NULL
-        return NULL;
-    }
-    (*n)++;
-    return res;
-}
-
-int _append(char *src, int src_size, char *dest, int dest_size)
-{
-    int i = 0;
-    for (i = 0; i < src_size; i++) {
-        dest[dest_size] = src[i];
-        dest_size++;
-    }
-    return dest_size;
-}
-
-char *join(char **src, int size, char delimiter)
-{
-    char *dest = NULL;
-    int i = 0, len = 0, existed = 0;
-    for (i = 0; i < size; i++) {
-        len = strlen(src[i]);
-        dest = realloc(dest, sizeof(char) * (existed + len + 1));
-        existed = _append(src[i], len, dest, existed);
-        if (i < size - 1) {
-            dest[existed] = delimiter;
-            existed = existed + 1;
-        }
-    }
-    dest[existed] = '\0';
-
-    return dest;
-}
-
 int has_prefix(const char *str, const char *pre)
 {
     return strncmp(str, pre, strlen(pre)) == 0;
 }
 
-char **split2(char *str, char delimiter)
+char *join(char **src, int n, char *delimiter)
 {
-    char *string = strdup(str);
-    char **res = malloc(sizeof(char) * strlen(str));
-    int i = 0, j = 0, n = 0, len = strlen(string);
+    char *dest = calloc(strlen(*src), sizeof(char));
+    int i = 0;
+    unsigned long size = 0;
 
-    // a,b,c
-    // 01234
-    for (i = 0; i < len; i++) {
-        if (str[i] == delimiter) {
-            string[i - j] = '\0';
-            res[n] = string;
-            string = string + i + 1;
-            j = i + 1;
-            n++;
+    for (i = 0; i < n; i++) {
+        size = sizeof(char) * (strlen(src[i]) + strlen(dest) + strlen(delimiter) + 2);
+        dest = realloc(dest, size);
+        strcat(dest, src[i]);
+        if (i < n - 1) {
+            strcat(dest, delimiter);
         }
+    }
+
+    return dest;
+}
+
+char **split(char *string, char delimiter, int *n)
+{
+    char *found = NULL;
+    char **res = malloc(strlen(string) * sizeof(char *));
+
+    while ((found = strsep(&string, &delimiter)) != NULL) {
+        res[*n] = found;
+        (*n)++;
     }
 
     return res;
@@ -129,6 +57,16 @@ char **split2(char *str, char delimiter)
 int main()
 {
     char *a = "a,b,c";
-    char **res = split2(a, ',');
-    printf("%s", res[0]);
+    int n = 0;
+    char *string = strdup(a);
+    char *delimiter = ",";
+    char **res = split(string, ',', &n);
+    for (int i = 0; i < n; i++) {
+        printf("%s\n", res[i]);
+    }
+    char *jo = join(res, n, delimiter);
+    printf("%s\n", jo);
+    free(string);
+    free(res);
+    free(jo);
 }
