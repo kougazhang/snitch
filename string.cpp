@@ -21,13 +21,30 @@ vector<string> *split(string s, char delimiter)
     return res;
 }
 
+string join(vector<string> arr, string delimiter)
+{
+    string ret;
+    int i = 0;
+
+    for (i = 0; i < arr.size(); i++) {
+        ret.append(arr[i]);
+        if (i == arr.size()-1) {
+            break;
+        } 
+        ret.append(delimiter);
+    }
+
+    return ret;
+}
+
 int main()
 {
-    string s = "a,b,c";
-    char delimiter = ',';
-    vector<string> *res = split(s, delimiter);
-    for (auto it : *res) {
-        cout << it << endl;
-    }
-    delete(res);
+    string s = "abc";
+    string delimiter = ",";
+    vector<string> res;
+    res.push_back(s);
+    res.push_back(s);
+    res.push_back(s);
+    string ret = join(res, delimiter); 
+    cout << ret << endl;
 }
